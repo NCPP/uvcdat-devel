@@ -2834,6 +2834,16 @@ CdunifFile(PyObject *self, PyObject *args)
     PyCdunifFile_AddHistoryLine(file, history);
   return (PyObject *)file;
 }
+/*Set httprc custom dir */
+PyObject *PyCdunif_setHttprcDirectory(PyObject *self, PyObject *args) {
+  char *dirname=NULL;
+  if (!PyArg_ParseTuple(args, "s", &dirname))
+    return NULL;
+  ocsethttprcdirectory(dirname);
+  ocinternalinitialize();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
 
 /* Wrapper for nc flag compression setting */
 PyObject *
@@ -2909,6 +2919,7 @@ static PyMethodDef cdunif_methods[] = {
   {"CdunifFile",	CdunifFile, 1, cdunif_doc},
   {"CdunifSetNCFLAGS",	(PyCFunction)PyCdunif_setncflags, 1},
   {"CdunifGetNCFLAGS",	(PyCFunction)PyCdunif_getncflags, 1},
+  {"CdunifSetHttprcDirectory", (PyCFunction)PyCdunif_setHttprcDirectory,1},
   {NULL,		NULL}		/* sentinel */
 };
 
