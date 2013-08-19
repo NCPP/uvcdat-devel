@@ -14,6 +14,12 @@ configure_file(
 set(pyzmq_CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${cdat_CMAKE_BINARY_DIR}/pyzmq_configure_step.cmake)
 set(pyzmq_INSTALL_COMMAND ${CMAKE_COMMAND} -P ${cdat_CMAKE_BINARY_DIR}/pyzmq_install_step.cmake)
 
+if (NOT OFFLINE_BUILD)
+    set(EGG_GZ pyzmq==${PYZMQ_VERSION} )
+else ()
+    set(EGG_GZ ${CDAT_PACKAGE_CACHE_DIR}/${PYZMQ_GZ})
+endif()
+
 set(pyzmq_source "${CMAKE_CURRENT_BINARY_DIR}/build/pyzmq")
 
 # create an external project to download numpy,
