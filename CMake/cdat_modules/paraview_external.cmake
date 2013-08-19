@@ -129,6 +129,7 @@ ExternalProject_Add(ParaView
   INSTALL_DIR ${ParaView_install}
   ${GIT_CMD_STR} 
   GIT_TAG ${paraview_branch}
+  UPDATE_COMMAND ""
   PATCH_COMMAND ""
   CMAKE_CACHE_ARGS
     -DBUILD_SHARED_LIBS:BOOL=ON
