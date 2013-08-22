@@ -40,7 +40,7 @@
 ############################################################################
 
 import vcs,cdms2 as cdms,sys,os,support
-
+support.dogui = True
 if support.dogui:
 
     f=cdms.open(os.path.join(cdms.__path__[0],'..','..','..','..','sample_data','clt.nc'))
@@ -48,24 +48,31 @@ if support.dogui:
     s=s[0:12,:]
 
     x=vcs.init()
-    y=vcs.init()
+#    y=vcs.init()
 
     b=x.createboxfill('new')
     x.plot(s,b)
 
-    x.animate.create(thread_it=0)
-#    x.animate.create()
+    #x.animate.create(thread_it=1)
+    #raw_input("press enter")
+    x.animate.create()
     x.animate.run()
-    x.animate.zoom(3)
+    import time
+    time.sleep(2)
+    x.animate.zoom(1.4)
+    time.sleep(2)
     x.animate.horizontal(50)
     x.animate.vertical(-50)
-
-    x.animate.gui()
-    x.animate.pause(4)
+    import time
+    time.sleep(3)
+#    x.animate.gui()
+    x.animate.pause(1)
+    import time
+    time.sleep(9)
     x.animate.stop()
-    x.animate.zoom(1)
-    x.animate.frame(2)
-    x.animate.frame(5)
-    x.animate.close()
+#    x.animate.zoom(1)
+#    x.animate.frame(2)
+#    x.animate.frame(5)
+#    x.animate.close()
 else:
-    print 'You need to run this one by hand (turn support.dogui to 1 first)'
+    print 'You need to run this one by hand (turn support.dogui to True first)'

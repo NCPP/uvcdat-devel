@@ -968,7 +968,11 @@ CANVASINFO_LINK          	cptr;
 #ifdef X11WM
 	XClearWindow(connect_id.display, connect_id.drawable);
 #elif defined QTWM
+	/* 2013-03-22 C. Doutriaux Qt will be handled from Python */
+	fprintf(stderr,"Don't forget to clear window first???\n");
+	
 	vcs_Qt_clear_window_by_id(connect_id.wkst_id);
+	
 #else
 	fprintf(stderr,"insert here your WM clear func\n");
 #endif
@@ -1095,7 +1099,11 @@ DNW*/
 #ifdef X11WM
            XResizeWindow(connect_id.display, connect_id.drawable, last_width, last_height);
 #elif defined QTWM
+	   /* 2013-03-22 No more drawing for now */
+	   fprintf(stderr,"Resize function was here\n");
+	   /*
            vcs_Qt_resize_window(connect_id.wkst_id,-1,-1,last_width, last_height);
+	   */
 #endif
 	   /* Show the image in the canvas */
 	   if (aptr->zoom_animation) { /* Zoom and Pan the Images */
@@ -1173,7 +1181,11 @@ DNW*/
                   XPutImage(cptr->connect_id.display,cptr->connect_id.drawable,
                    gc,zoom_ximage,0,0,0,0,iptr->ras_width, iptr->ras_height);
 #elif defined QTWM
+		 /* 2013-03-22 C. Doutriaux, no more display from here */
+		 fprintf(stderr, "used to display zoomed image here\n");
+		 
 		 vcs_Qt_window_put_image_by_id(cptr->connect_id.wkst_id,zoom_ximage);
+		 
 
 #else
 		 fprintf(stderr,"insert your put image 1 here\n");
@@ -1185,7 +1197,12 @@ DNW*/
                XPutImage(cptr->connect_id.display,cptr->connect_id.drawable,
                 gc,iptr->ximage,0, 0,0,0,iptr->ras_width, iptr->ras_height);
 #elif defined QTWM
+	      /* 2013-03-22 C. Doutriaux, no more display from here */
+	      fprintf(stderr,"We used to plot the image from here!\n");
+	      
 	      vcs_Qt_window_put_image_by_id(cptr->connect_id.wkst_id,iptr->ximage);
+	      
+	      
 #else
 		 fprintf(stderr,"insert your put image 2 here\n");
 #endif
@@ -1271,7 +1288,11 @@ stopa:  Py_END_ALLOW_THREADS
 #ifdef X11WM
 	   XClearWindow(cptr->connect_id.display,cptr->connect_id.drawable);
 #elif defined QTWM
+	   /* 2013-03-22 No more drawing from here */
+	   fprintf(stderr,"We used to clear here again\n");
+	   /*
 	   vcs_Qt_clear_window_by_id(cptr->connect_id.wkst_id);
+	   */
 #else
 	   fprintf(stderr,"insert your WM clear func here\n");
 #endif
@@ -1289,7 +1310,11 @@ stopa:  Py_END_ALLOW_THREADS
 	      XClearWindow(tcptr->connect_id.display,
                            tcptr->connect_id.drawable);
 #elif defined QTWM
+	   /* 2013-03-22 No more drawing from here */
+	   fprintf(stderr,"We used to clear from here as well\n");
+	   /*
 	   vcs_Qt_clear_window_by_id(tcptr->connect_id.wkst_id);
+	   */
 #else
 	   fprintf(stderr,"insert your WM clear func here\n");
 #endif
@@ -2102,7 +2127,7 @@ void *call_data;
            if ( (fp = fopen(load_file_name, "r")) == NULL) {
               err_warn(1,fperr,
                 "Error - Cannot open the output file (%s).\n", load_file_name);
-              return ;
+              return 0;
            }
 
            /* Step through each raster image in the file */
@@ -2131,14 +2156,14 @@ void *call_data;
                  if (ras_load_colormap(fp, &rh, &map_length, red, green, blue) == -1) {
                      err_warn(1,fperr, "Error - Cannot read colormap data.\n");
                      fclose(fp);
-                     return ;
+                     return 0;
                  }
 
                  /* Create the raster link list */
                  if ((iptr=(ANIMATIONMEMORYLIST_LINK)malloc(sizeof(ANIMATIONMEMORYLIST))) == NULL) {
                      err_warn(1,fperr,
                      "Error - Cannot Store any more images in memory!\n");
-                      return;
+                      return 0;
                  }
 		 if(!use_shared_mem) {
 #ifdef X11WM
