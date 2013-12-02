@@ -478,6 +478,8 @@ foreach(package ${external_packages})
   enable_cdat_package_deps(${package})
 endforeach()
 
+set(CDAT_BUILD_VISIT CACHE BOOL OFF)
+
 foreach(package ${external_packages})
   string(TOLOWER ${package} lc_package)
   string(TOUPPER ${package} uc_package)
