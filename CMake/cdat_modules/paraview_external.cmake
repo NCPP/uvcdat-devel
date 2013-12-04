@@ -7,6 +7,10 @@ if(QT_QMAKE_EXECUTABLE)
   get_filename_component(QT_ROOT ${QT_BINARY_DIR} PATH)
 endif()
 
+if(APPLE)
+  set(_apple_install_arg "-DMACOSX_APP_INSTALL_PREFIX:PATH=<INSTALL_DIR>")
+endif()
+
 set(ParaView_install_command "")
 
 # For some reason, someone previously found out that *nix systems require this to setup
@@ -154,6 +158,7 @@ ExternalProject_Add(ParaView
     -DVTK_LEGACY_SILENT:BOOL=ON
   CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    ${_apple_install_arg}
   INSTALL_COMMAND ${ParaView_install_command}
   DEPENDS ${ParaView_deps}
   ${ep_log_options}
