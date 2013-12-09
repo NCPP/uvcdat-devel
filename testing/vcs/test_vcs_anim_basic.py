@@ -23,5 +23,5 @@ ret = 0
 ## now check the generated images
 for i in range(15):
  src_img = src % (i+1)
- ret+=checkimage.check_result_image("test_anim_basic_out_%i.png" % (i+1),src_img,0.05)
+ ret+=checkimage.check_result_image("test_anim_basic_out_%i.png" % (i+1),src_img,0.15)
 sys.exit(ret)
