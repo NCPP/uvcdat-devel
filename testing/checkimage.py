@@ -19,6 +19,15 @@ def compare_imgs(adata, bdata):
         return -1
     return rms
 
+def compare_imgs_normalized(adata, bdata):
+    try:
+        rms = numpy.sqrt(numpy.sum((adata-bdata)**2))/numpy.sqrt(numpy.sum(adata**2))
+    except:
+        print "images are not compatible"
+        return -1
+    return rms
+
+
 def image_from_file(fname):
     try:
       areader = mpimg.imread(fname)
@@ -38,7 +47,7 @@ def find_alternates(fname):
             results.append(os.path.join(dirname, i))
     return results
 
-def check_result_image(fname, baselinefname, threshold):
+def check_result_image(fname, baselinefname, threshold, normalized=False):
     resultimg = image_from_file(fname)
     if resultimg == None:
         print "no result image, failed test"
@@ -61,7 +70,10 @@ def check_result_image(fname, baselinefname, threshold):
         nextbimage = image_from_file(x)
         if nextbimage == None:
             continue
-        res = compare_imgs(resultimg, nextbimage)
+        if normalized:
+            res = compare_imgs_normalized(resultimg, nextbimage)
+        else:
+            res = compare_imgs(resultimg, nextbimage)
         print "result " + str(res)
         if res >= 0:
             if bestresult == None or res < bestresult:
