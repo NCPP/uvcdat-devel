@@ -53,6 +53,8 @@ list(APPEND ParaView_tpl_args
   -DPARAVIEW_BUILD_PLUGIN_MobileRemoteControl:BOOL=OFF
   -DPQWIDGETS_DISABLE_QTWEBKIT:BOOL=ON
   -DModule_vtkIOGeoJSON:BOOL=ON
+  -DModule_vtklibproj4:BOOL=ON
+  -DModule_vtkViewsGeovis:BOOL=ON
   -DCMAKE_PREFIX_PATH:PATH=${cdat_EXTERNALS}
 )
 
