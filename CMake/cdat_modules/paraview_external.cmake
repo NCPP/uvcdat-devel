@@ -107,14 +107,8 @@ else()
 endif()
 
 list(APPEND ParaView_tpl_args
-  -DPARAVIEW_USE_GNU_R:BOOL=ON
-  -DR_COMMAND:PATH=${R_install}/bin/R
-  -DR_DIR:PATH=${R_install}/lib/R
-  -DR_INCLUDE_DIR:PATH=${R_install}/lib/R/include
-  -DR_LIBRARY_BASE:PATH=${R_install}/lib/R/lib/libR${_LINK_LIBRARY_SUFFIX}
-  -DR_LIBRARY_BLAS:PATH=${R_install}/lib/R/lib/libRblas${_LINK_LIBRARY_SUFFIX}
-  -DR_LIBRARY_LAPACK:PATH=${R_install}/lib/R/lib/libRlapack${_LINK_LIBRARY_SUFFIX}
-  -DR_LIBRARY_READLINE:PATH=)
+    -DPARAVIEW_USE_GNU_R:BOOL=OFF
+)
 
 if(UVCDAT_TESTDATA_LOCATION)
   list(APPEND ParaView_tpl_args
