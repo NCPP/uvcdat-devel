@@ -1738,14 +1738,34 @@ Options:::
             if len(ticks[k])==0:
                 continue
             if axis=="longitude":
-                if k<0:
-                    ticks[k]=ticks[k][1:]+"W"
-                elif k>0:
-                    ticks[k]=ticks[k]+"E"
+                K = k % 360
+                if K>180:
+                    if int(K)==float(K):
+                      ticks[k]="%iW" % (360-K)
+                    else:
+                      ticks[k]="%.2fW" % (360-K)
+                elif K<180:
+                    if numpy.allclose(K,0.):
+                      ticks[k]="0"
+                    elif int(K)==float(K):
+                      ticks[k]="%iE" % (K)
+                    else:
+                      ticks[k]="%.2fE" % (K)
+                else:
+                  if k==-180.:
+                    ticks[k]="180W"
+                  else:
+                    ticks[k]="180E"
             elif axis=="latitude":
                 if k<0:
-                    ticks[k]=ticks[k][1:]+"S"
+                    if len(ticks[k])>4:
+                      ticks[k]="%.1f" % eval(ticks[k][1:])+"S"
+                    else:
+                      ticks[k]=ticks[k][1:]+"S"
                 elif k>0:
+                  if len(ticks[k])>4:
+                    ticks[k]="%.1f" % eval(ticks[k])+"N"
+                  else:
                     ticks[k]=ticks[k]+"N"
                 else:
                     ticks[0]="Eq"
@@ -1769,8 +1789,11 @@ Options:::
             dic[i]=False
         #xticklabels1
         if gm.xticlabels1 is None or gm.xticlabels1=='*':
-            ticks=vcs.mkscale(datawc_x1,datawc_x2)
-            ticks=self.prettifyAxisLabels(vcs.mklabels(ticks),x)
+            if x=="longitude" and abs(datawc_x2-datawc_x1)>30:
+              ticks="lon30"
+            else:
+              ticks=vcs.mkscale(datawc_x1,datawc_x2)
+              ticks=self.prettifyAxisLabels(vcs.mklabels(ticks),x)
             ## for k in ticks.keys() : # make sure you're in the range
             ##     if k<numpy.minimum(datawc_x1,datawc_x2) or k>numpy.maximum(datawc_x2,datawc_x1):
             ##         del(ticks[k])
@@ -1812,9 +1835,11 @@ Options:::
             dic['xmtics2']=True
         #yticklabels1
         if gm.yticlabels1 is None or gm.yticlabels1=='*':
-            ticks=vcs.mkscale(datawc_y1,datawc_y2)
-            print "TICKS come back as:",ticks
-            ticks=self.prettifyAxisLabels(vcs.mklabels(ticks),y)
+            if y=="latitude" and abs(datawc_y2-datawc_y1)>20:
+              ticks="lat20"
+            else:
+              ticks=vcs.mkscale(datawc_y1,datawc_y2)
+              ticks=self.prettifyAxisLabels(vcs.mklabels(ticks),y)
             ## for k in ticks.keys() : # make sure you're in the range
             ##     if k<numpy.minimum(datawc_y1,datawc_y2) or k>numpy.maximum(datawc_y2,datawc_y1):
             ##         del(ticks[k])
@@ -5311,7 +5336,19 @@ Options:::
                 datawc_x2=MV2.maximum(arglist[0])
                 x=None
             else:            
+              try:
+                if arglist[0].getAxis(-1).isCircularAxis():
+                  datawc_x1=arglist[0].getAxis(-1)[0]
+                else:
+                  datawc_x1=arglist[0].getAxis(-1).getBounds()[0][0]
+              except:
                 datawc_x1=arglist[0].getAxis(-1)[0]
+              try:
+                if arglist[0].getAxis(-1).isCircularAxis():
+                  datawc_x2=arglist[0].getAxis(-1)[-1]
+                else:
+                  datawc_x2=arglist[0].getAxis(-1).getBounds()[-1][1]
+              except:
                 datawc_x2=arglist[0].getAxis(-1)[-1]
             if arglist[0].getAxis(-2).isLongitude():
                 y="longitude"
@@ -5327,8 +5364,14 @@ Options:::
                 datawc_y2=MV2.maximum(arglist[1])
                 y=None
             else:
-                datawc_y1=arglist[0].getAxis(-2)[0]
-                datawc_y2=arglist[0].getAxis(-2)[-1]
+                try:
+                  datawc_y1=arglist[0].getAxis(-2).getBounds()[0][0]
+                except:
+                  datawc_y1=arglist[0].getAxis(-2)[0]
+                try:
+                  datawc_y2=arglist[0].getAxis(-2).getBounds()[-1][1]
+                except:
+                  datawc_y2=arglist[0].getAxis(-2)[-1]
         except:
             pass
         try:
