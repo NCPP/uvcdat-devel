@@ -873,7 +873,28 @@ class CdmsFile(CdmsObj, cuDataset, AutoAPI.AutoAPI):
                     pass
             _fileobj_ = Cdunif.CdunifFile (path, mode)
         except Exception,err:
-            raise CDMSError, 'Cannot open file %s (%s)'%(path,err)
+            try:
+                from ocgis import ShpCabinetIterator
+                from ocgis.interface.base.variable import Variable
+                from ocgis.interface.shp.dimension import ShpVectorDimension
+                from ocgis.interface.shp.field import ShpField
+                from ocgis.interface.base.dimension.spatial import SpatialGeometryDimension, SpatialDimension
+                import numpy as np
+                ocgis_data = ShpCabinetIterator(path=path)
+                ocgis_data.load_geoms = False
+                ocgis_ugid = [d['properties']['UGID'] for d in ocgis_data]
+                ocgis_data.load_geoms = True
+                ocgis_src_idx = np.array(ocgis_ugid).reshape(1,-1)
+                ocgis_uid = ocgis_src_idx.copy()
+                ocgis_svd = ShpVectorDimension(data=ocgis_data,name='POLYGON',src_idx=ocgis_src_idx,uid=ocgis_uid)
+                ocgis_geom = SpatialGeometryDimension(polygon=ocgis_svd)
+                ocgis_sd = SpatialDimension(geom=ocgis_geom,abstraction='polygon')
+                ocgis_var = Variable(name='UGID',data=ocgis_data)
+                self._file_ = ShpField(spatial=ocgis_sd,variables=ocgis_var)
+                self._status_ = 'closed'
+                return
+            except:
+                raise CDMSError, 'Cannot open file %s (%s)'%(path,err)
         self._file_ = _fileobj_   # Cdunif file object
         self.variables = {}
         self.axes = {}
@@ -1796,7 +1817,31 @@ class CdmsFile(CdmsObj, cuDataset, AutoAPI.AutoAPI):
         variable :: (cdms2.fvariable.FileVariable/None) (0) file variable
         :::        
         """
-        return self.variables.get(id)
+        try:
+            return self.variables.get(id)
+        except AttributeError:
+            import numpy as np
+            ocgis_var = self._file_.variables[id]
+            
+            class ShapefileVariable(object):
+                
+                def __init__(self,ocgis_var):
+                    self._ocgis_var = ocgis_var
+                    
+                def __getitem__(self,*args):
+                    return(self.getValue().__getitem__(*args))
+                
+                @property
+                def shape(self):
+                    return((self._ocgis_var.shape[-1],))
+                
+                def getGeometries(self):
+                    return(self._ocgis_var._field.spatial.geom.get_highest_order_abstraction().value.squeeze())
+                    
+                def getValue(self):
+                    return(self._ocgis_var.value.squeeze())
+                    
+            return(ShapefileVariable(ocgis_var))
 
     def getVariables(self, spatial=0):
         """Get a list of variable objects. If spatial=1, only return those
@@ -1809,9 +1854,12 @@ class CdmsFile(CdmsObj, cuDataset, AutoAPI.AutoAPI):
         variables :: ([cdms2.fvariable.FileVariable]) (0) file variables
         :::        
 """
-        retval = self.variables.values()
-        if spatial:
-            retval = filter(lambda x: x.id[0:7]!="bounds_" and x.id[0:8]!="weights_" and ((x.getLatitude() is not None) or (x.getLongitude() is not None) or (x.getLevel() is not None)), retval)
+        try:
+            retval = self.variables.values()
+            if spatial:
+                retval = filter(lambda x: x.id[0:7]!="bounds_" and x.id[0:8]!="weights_" and ((x.getLatitude() is not None) or (x.getLongitude() is not None) or (x.getLevel() is not None)), retval)
+        except AttributeError:
+            retval = self._file_.variables.keys()
         return retval
 
     def getAxis(self, id):
