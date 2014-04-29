@@ -155,6 +155,35 @@ class AbstractVariable(CdmsObj, Slab):
                                          grid=grid)
 
     select = __call__
+    
+    def getGeometries(self,abstraction=None):
+        '''
+        :param str abstraction: If ``None``, return the highest order geometric
+         abstraction available for the variable. If ``point``, return geometries
+         represented as points. If ``polygon``, return the polygon representation.
+        '''
+        from ocgis import RequestDataset
+        rd = RequestDataset(uri=self.parent.id,variable=self.id)
+        field = rd.get()
+        if abstraction == None:
+            ret = field.spatial.geom.get_highest_order_abstraction()
+        else:
+            ret = getattr(field.spatial.geom,abstraction)
+        return(ret.value)
+    
+    def getSpatialIntersects(self,polygon):
+        from ocgis import OcgOperations, RequestDataset
+        rd = RequestDataset(uri=self.parent.id,variable=self.id)
+        ops = OcgOperations(dataset=rd,geom=polygon)
+        ret = ops.execute()
+        field = ret[1][self.id]
+        row_idx = field.spatial.grid.row._src_idx
+        row_slice = slice(row_idx.min(),row_idx.max()+1)
+        col_idx = field.spatial.grid.col._src_idx
+        col_slice = slice(col_idx.min(),col_idx.max()+1)
+        ret_value = self[:,row_slice,col_slice]
+        ret_value.mask = field.spatial.get_mask()
+        return(ret_value)
 
     def rank (self):
         return len(self.shape)
